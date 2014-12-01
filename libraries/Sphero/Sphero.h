@@ -11,7 +11,8 @@
 
 #include <stdint.h>
 #include <Arduino.h>
-#include <Serial.h>
+//#include <Serial.h>
+#include <RFduinoBLE.h>
 
 #define SPHERO_IMU_YAW      0x00010000
 #define SPHERO_IMU_ROLL     0x00020000
@@ -57,11 +58,11 @@ public:
   short getDataLength( void );
   unsigned char getData( char num );
   
-  void readAsyncPacket( void );
+  //void readAsyncPacket( void );
   
 private:
   char sendCommand( char DID, char CID, char SEQ, char DLEN, ... );
-  char readSimplePacket( void );
+  //char readSimplePacket( void );
   
   char mrsp;
   char seq;

@@ -9,9 +9,10 @@
 #include <stdint.h>
 #include <Arduino.h>
 #include <Sphero.h>
+#include <RFduinoBLE.h>
 
 Sphero::Sphero(){
-    Serial1.begin(115200);
+    //Serial1.begin(115200);
     
     streamingParams.numOfPackets = 16;
 }
@@ -89,12 +90,13 @@ char Sphero::sendCommand(char DID, char CID, char SEQ, char DLEN, ...){
     //Serial1.flush();
     
     // Write data
-    Serial1.write(char(0xFF));
-    Serial1.write(char(0xFF));
-    Serial1.write(char(DID));
-    Serial1.write(char(CID));
-    Serial1.write(char(SEQ));
-    Serial1.write(char(DLEN));
+    // Serial1.write(...);
+    RFduinoBLE.sendByte(char(0xFF));
+    RFduinoBLE.sendByte(char(0xFF));
+    RFduinoBLE.sendByte(char(DID));
+    RFduinoBLE.sendByte(char(CID));
+    RFduinoBLE.sendByte(char(SEQ));
+    RFduinoBLE.sendByte(char(DLEN));
     
     // Calculate checksum
     sum += DID + CID + SEQ + DLEN;
@@ -102,19 +104,20 @@ char Sphero::sendCommand(char DID, char CID, char SEQ, char DLEN, ...){
     va_start(args, DLEN);
     for(; i<DLEN-1; i++){
         data = va_arg(args, int);
-        Serial1.write(data);
+        RFduinoBLE.sendByte(data);
         
         sum += data;
     }
     va_end(args);
     
     // Write Checksum
-    Serial1.write(char(~sum));
+    RFduinoBLE.sendByte(char(~sum));
     
     delay(50);
     
     // Wait for Simple Response
-    return readSimplePacket();
+    //return readSimplePacket();
+    return 0;
 }
 
 // Packet attribute functions
@@ -138,7 +141,7 @@ unsigned char Sphero::getData(char num){
     return data[num];
 }
 
-
+/*
 char Sphero::readSimplePacket(){
     int i;
     
@@ -206,4 +209,4 @@ void Sphero::readAsyncPacket(){
         setStreamingData(streamingParams.freq, streamingParams.frames_per_sample, streamingParams.mask);
     }
 }
-  
+  */
