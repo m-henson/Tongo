@@ -11,7 +11,7 @@ void setup() {
   
   RFduinoBLE.begin();
 }
-
+//d846963f78b7
 void loop() {
   // switch to lower power mode
   RFduino_ULPDelay(INFINITE);

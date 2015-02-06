@@ -19,20 +19,25 @@ void setup(){
     sendCmd("---");
     */
     
-    //RFduinoBLE.advertisementData = "tongo";
+    // rfduino: D846963F78B7
+    //RFduinoBLE.advertisementData = "Sphero-PPG";
+    //RFduinoBLE.advertisementData = "6886E7020B80";
     //RFduinoBLE.advertisementInterval = MILLISECONDS(500);
     //RFduinoBLE.deviceName = "RFduino";
     //RFduinoBLE.txPowerLevel = -20;
     //RFduinoBLE.txPowerLevel = +4;
+    //RFduinoBLE.customUUID = "00001101-0000-1000-8000-00805f9b34fb";
+
   
     // start the BLE stack
-    RFduinoBLE.begin();
+    //RFduinoBLE.begin();
     
     // Reconnect to Bluetooth and configure to master    
     //Serial1.begin(115200);  // *** This too ***
     
     i = 1;
     sphero_id = "";
+     RFduinoBLE.send("$$$", 3);
 }
 
 void loop(){
@@ -47,15 +52,16 @@ void loop(){
   
   char sop1 = char(0xFF);
   char sop2 = char(0xFF);
-  char did = char(0x01);
-  char cid = char(0x11);
+  char did = char(0x00);
+  char cid = char(0x11);//01 for ping, 11 for ble info
   char seq = char(0x00);
   char dlen = char(0x01);
   char sum = (did + cid + seq + dlen) % 256;
   char chk = char(~sum);
-  //char chk = char(0xEC);
+  //char chk = char(0xEC);// ping
+  //char chk = char(0xED);// ble info
   Serial.println(chk, HEX);
-  Serial.println(sop1, HEX);
+  //Serial.println(sop1, HEX);
   
   char message[7]; 
   message[0] = sop1;
@@ -71,13 +77,13 @@ void loop(){
   //RFduinoBLE.send(message, 7);
   //Serial.println(message);
   
-  //RFduinoBLE.sendByte(sop1);
-  //RFduinoBLE.sendByte(sop2);
-  //RFduinoBLE.sendByte(did);
-  //RFduinoBLE.sendByte(cid);
-  //RFduinoBLE.sendByte(seq);
-  //RFduinoBLE.sendByte(dlen);
-  //RFduinoBLE.sendByte(chk);
+  RFduinoBLE.sendByte(sop1);
+  RFduinoBLE.sendByte(sop2);
+  RFduinoBLE.sendByte(did);
+  RFduinoBLE.sendByte(cid);
+  RFduinoBLE.sendByte(seq);
+  RFduinoBLE.sendByte(dlen);
+  RFduinoBLE.sendByte(chk);
   
   
   //sendCmd("$$$");
@@ -85,10 +91,12 @@ void loop(){
   //sendCmd("C,68:86:e7:02:0b:80");
   //sendCmd("C,6886E7020B80");
   //RFduinoBLE.send("C,6886E7020B80", 14);
-  RFduinoBLE.send("C,", 2);
-  RFduinoBLE.sendByte(char(0x6886E7020B80));
+  //RFduinoBLE.send("C,", 2);
+  //RFduinoBLE.sendByte(char(0x6886E7020B80));
   //RFduinoBLE.send("C,6886E7020B80\r", 15);
   //RFduinoBLE.send("$$$C,6886E7020B80\r", 18);
+  //RFduinoBLE.sendByte(char(0x0003));
+  //RFduinoBLE.send("$$$", 3);
   
   
   RFduino_ULPDelay(INFINITE);
