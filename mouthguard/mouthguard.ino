@@ -21,9 +21,9 @@ the green led on the host will toggle.
 #define BACKWARD 3
 #define BRAKE 4
 
-#define V_MAX 300
-#define V_MIN 0
-#define V_DIV 20.0
+#define V_MAX 77
+#define V_MIN 2
+#define V_DIV 5.0
 
 #define N_MAGS 16
 
@@ -34,7 +34,8 @@ int reading_left;
 String state_new;
 String state_current;
 int heading;
-int mag;
+int mag_new;
+int mag_current;
 
 void setup()
 {
@@ -43,6 +44,7 @@ void setup()
   pinMode(PIN_FORWARD, INPUT);
   pinMode(PIN_LEFT, INPUT);
   state_current = "";
+  mag_current = -1;
   RFduinoGZLL.begin(ROLE);
 }
 
@@ -58,26 +60,37 @@ void loop()
   if (reading_forward >= reading_right && reading_forward >= reading_left)
   {
     heading = FORWARD;
-    mag = getMag(reading_forward);
+    mag_new = getMag(reading_forward);
   }
   // right
   else if (reading_right >= reading_left)
   {
     heading = RIGHT;
-    mag = getMag(reading_right);
+    mag_new = getMag(reading_right);
   }
   // left
   else
   {
     heading = LEFT;
-    mag = getMag(reading_left);
+    mag_new = getMag(reading_left);
   }
   
-  state_new = String(heading*N_MAGS + mag);
+  if (mag_new <= 0)
+  {
+    heading = 4;
+  }
+  
+  state_new = String(heading*N_MAGS + mag_new);
   if (state_new != state_current)
   {
+    Serial.print(state_new);
+    Serial.print(": ");
+    Serial.print(heading);
+    Serial.print(" -> ");
+    Serial.println(mag_new);
     RFduinoGZLL.sendToHost(state_new);
     state_current = state_new;
+    mag_current = mag_new;
   }
   /*
   delay(10000);
@@ -92,6 +105,7 @@ void loop()
   RFduinoGZLL.sendToHost(0x40);
   */
 }
+
 
 int getMag(int voltage)
 {

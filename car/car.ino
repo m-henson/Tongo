@@ -1,10 +1,10 @@
 #include <RFduinoGZLL.h>
 
-#define PIN_I1 5
+#define PIN_I1 3
 #define PIN_I2 4
-#define PIN_I3 3
-#define PIN_I4 2
-#define PIN_EA 6
+#define PIN_I3 5
+#define PIN_I4 6
+#define PIN_EA 2
 #define PIN_EB 1
 
 #define RIGHT 0
@@ -32,7 +32,7 @@ void setup()
   pinMode(PIN_I3, OUTPUT);
   pinMode(PIN_I4, OUTPUT);
   pinMode(PIN_EA, OUTPUT);
-  pinMode(PIN_EB, OUTPUT);
+  //pinMode(PIN_EB, OUTPUT);
   speed_current = 0;
   direction_current = 5; // neither forward, backwards, left, right, or brake
   RFduinoGZLL.begin(ROLE);
@@ -74,19 +74,27 @@ void controlCar(int update)
   switch (update_direction)
   {
     case RIGHT:
-      update_speed = round(11.0 * 17.0 + double(update_speed) * 68.0 / 15.0);
+      //update_speed = 255;
+      //update_speed *= 17;
+      update_speed = int(round(11.0 * 17.0 + double(update_speed) * 68.0 / 15.0));
       goRight(update_speed);
       break;
     case FORWARD:
-      update_speed = round(6.0 * 17.0 + double(update_speed) * 10.2);
+      //update_speed = 255;
+      //update_speed *= 17;
+      update_speed = int(round(6.0 * 17.0 + double(update_speed) * 10.2));
       goForward(update_speed);
       break;
     case LEFT:
-      update_speed = round(11.0 * 17.0 + double(update_speed) * 68.0 / 15.0);
+      //update_speed = 255;
+      //update_speed *= 17;
+      update_speed = int(round(11.0 * 17.0 + double(update_speed) * 68.0 / 15.0));
       goLeft(update_speed);
       break;
     case BACKWARD:
-      update_speed = round(6.0 * 17.0 + double(update_speed) * 10.2);
+      //update_speed = 255;
+      //update_speed *= 17;
+      update_speed = int(round(6.0 * 17.0 + double(update_speed) * 10.2));
       goBackward(update_speed);
       break;
     default:
@@ -100,7 +108,7 @@ void newSpeed(int speed_new)
   if (speed_new != speed_current)
   {
     analogWrite(PIN_EA, speed_new);
-    analogWrite(PIN_EB, speed_new);
+    //analogWrite(PIN_EB, speed_new);
     speed_current = speed_new;
   }
 }
