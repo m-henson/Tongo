@@ -1,11 +1,8 @@
-#include <RFduinoGZLL.h>
-
-#define ROLE DEVICE0
 #define DELAY 10
 
-#define PIN_RIGHT 2
-#define PIN_FORWARD 3
-#define PIN_LEFT 4
+#define PIN_RIGHT A0
+#define PIN_FORWARD A1
+#define PIN_LEFT A2
 
 #define RIGHT 0
 #define FORWARD 1
@@ -13,24 +10,29 @@
 #define BACKWARD 3
 #define BRAKE 4
 
-#define V_MAX 77
-#define V_MIN 2
-#define V_DIV 5.0
+#define V_MAX 260
+#define V_MIN 20
+#define V_DIV 16.0
 
 #define N_MAGS 16
 
-
-#define PIN_CUE_RIGHT 5
-#define PIN_CUE_FORWARD 0
-#define PIN_CUE_LEFT 6
-#define PIN_CUE_BRAKE 1
+#define PIN_CUE_RIGHT 9
+#define PIN_CUE_FORWARD 8
+#define PIN_CUE_LEFT 7
+#define PIN_CUE_BRAKE 10
 
 #define PIN_CUE_0 5
 #define PIN_CUE_1 6
 
-#define WAIT_MIN 2000
-#define WAIT_MAX 8000
-#define WAIT_STABLE 100
+#define PIN_WAIT_0 11
+#define PIN_WAIT_1 12
+#define PIN_WAIT_2 13
+
+
+#define WAIT_0 600
+#define WAIT_1 800
+#define WAIT_2 1000
+#define WAIT_STABLE 50
 
 #define TEST_STATE_WAIT 0
 #define TEST_STATE_TRANSITION 1
@@ -58,39 +60,63 @@ int heading_next;
 int test_state;
 boolean delaying;
 
+int time_diff;
+boolean reading_0;
+boolean reading_1;
+boolean reading_2;
+
 void setup()
 {
   Serial.begin(9600);
   pinMode(PIN_RIGHT, INPUT);
   pinMode(PIN_FORWARD, INPUT);
   pinMode(PIN_LEFT, INPUT);
-  /*pinMode(PIN_CUE_RIGHT, OUTPUT);
+  pinMode(PIN_CUE_RIGHT, OUTPUT);
   pinMode(PIN_CUE_FORWARD, OUTPUT);
   pinMode(PIN_CUE_LEFT, OUTPUT);
   pinMode(PIN_CUE_BRAKE, OUTPUT);
+  pinMode(PIN_WAIT_0, INPUT);
+  pinMode(PIN_WAIT_1, INPUT);
+  pinMode(PIN_WAIT_2, INPUT);
   digitalWrite(PIN_CUE_RIGHT, LOW);
   digitalWrite(PIN_CUE_FORWARD, LOW);
   digitalWrite(PIN_CUE_LEFT, LOW);
-  digitalWrite(PIN_CUE_BRAKE, LOW);*/
-  pinMode(PIN_CUE_0, OUTPUT);
-  pinMode(PIN_CUE_1, OUTPUT);
+  digitalWrite(PIN_CUE_BRAKE, LOW);
   state_current = "";
   mag_current = -1;
   heading_last = BRAKE + 1;
   heading_stable = heading_last;
   heading_next = BRAKE;
+  writeLed(heading_next, HIGH);
   time_last = millis();
   time_stable = -2 * WAIT_STABLE;
   time_next = time_last + 10000;
   test_state = TEST_STATE_TRANSITION;
   delaying = false;
   debugTest(false, millis(), time_next - time_last, heading_next);
-  RFduinoGZLL.begin(ROLE);
+  time_diff = 0;
 }
 
 void loop()
 {
   delay(DELAY);
+  
+  reading_0 = digitalRead(PIN_WAIT_0);
+  reading_1 = digitalRead(PIN_WAIT_1);
+  reading_2 = digitalRead(PIN_WAIT_2);
+  
+  if (reading_0)
+  {
+    set_time_diff(WAIT_0);
+  }
+  else if (reading_1)
+  {
+    set_time_diff(WAIT_1);
+  }
+  else
+  {
+    set_time_diff(WAIT_2);
+  }
   
   reading_right = analogRead(PIN_RIGHT);
   reading_forward = analogRead(PIN_FORWARD);
@@ -172,9 +198,9 @@ void loop()
     heading_last = heading_next;
     while (heading_last == heading_next || heading_next == BACKWARD || heading_next == heading)
     {
-      heading_next = random(BRAKE + 1);
+      heading_next = random(BRAKE);
     }
-    time_next = random(WAIT_MIN, WAIT_MAX + 1);
+    time_next = time_diff;
     time_last = millis();
     
     time_next += time_last;
@@ -184,17 +210,26 @@ void loop()
     debugTest(test_state == TEST_STATE_HOLD, time_last, time_next - time_last, heading_next);
     test_state = TEST_STATE_WAIT;
   }
-    
+  
   if (state_new != state_current)
   {
-    /*Serial.print(state_new);
-    Serial.print(": ");
-    Serial.print(heading);
-    Serial.print(" -> ");
-    Serial.println(mag_new);*/
-    RFduinoGZLL.sendToHost(state_new);
     state_current = state_new;
     mag_current = mag_new;
+  }
+}
+
+void set_time_diff(int diff)
+{
+  if (diff != time_diff)
+  {
+    time_diff = diff;
+    Serial.println(",");
+    Serial.println(",");
+    Serial.println(",");
+    Serial.print("T = ");
+    Serial.println(time_diff);
+    Serial.println(",");
+    Serial.println(",");
   }
 }
 
@@ -239,28 +274,32 @@ void writeLed(int h, boolean voltage)
   switch (h)
     {
       case RIGHT:
-        //digitalWrite(PIN_CUE_RIGHT, voltage);
-        digitalWrite(PIN_CUE_0, LOW);
-        digitalWrite(PIN_CUE_1, LOW);
+        digitalWrite(PIN_CUE_RIGHT, voltage);
+        digitalWrite(PIN_CUE_FORWARD, LOW);
+        digitalWrite(PIN_CUE_LEFT, LOW);
+        digitalWrite(PIN_CUE_BRAKE, LOW);
         break;
       case FORWARD:
-        //digitalWrite(PIN_CUE_FORWARD, voltage);
-        digitalWrite(PIN_CUE_0, HIGH);
-        digitalWrite(PIN_CUE_1, LOW);
+        digitalWrite(PIN_CUE_FORWARD, voltage);
+        digitalWrite(PIN_CUE_RIGHT, LOW);
+        digitalWrite(PIN_CUE_LEFT, LOW);
+        digitalWrite(PIN_CUE_BRAKE, LOW);
         break;
       case LEFT:
-        //digitalWrite(PIN_CUE_LEFT, voltage);
-        digitalWrite(PIN_CUE_0, LOW);
-        digitalWrite(PIN_CUE_1, HIGH);
+        digitalWrite(PIN_CUE_LEFT, voltage);
+        digitalWrite(PIN_CUE_FORWARD, LOW);
+        digitalWrite(PIN_CUE_RIGHT, LOW);
+        digitalWrite(PIN_CUE_BRAKE, LOW);
         break;
       case BRAKE:
-        //digitalWrite(PIN_CUE_BRAKE, voltage);
-        digitalWrite(PIN_CUE_0, HIGH);
-        digitalWrite(PIN_CUE_1, HIGH);
+        digitalWrite(PIN_CUE_BRAKE, voltage);
+        digitalWrite(PIN_CUE_FORWARD, LOW);
+        digitalWrite(PIN_CUE_LEFT, LOW);
+        digitalWrite(PIN_CUE_RIGHT, LOW);
         break;
       default:
         Serial.print("ERROR: bad heading ");
-        Serial.println(heading_next);
+        Serial.println(h);
         break;
     }
 }

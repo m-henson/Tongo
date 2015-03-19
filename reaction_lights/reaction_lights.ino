@@ -1,9 +1,9 @@
 #define DELAY 10
 
-#define PIN_CUE_RIGHT 4
-#define PIN_CUE_FORWARD 5
-#define PIN_CUE_LEFT 6
-#define PIN_CUE_BRAKE 7
+#define PIN_CUE_RIGHT 10
+#define PIN_CUE_FORWARD 9
+#define PIN_CUE_LEFT 8
+#define PIN_CUE_BRAKE 11
 
 #define PIN_C0 2
 #define PIN_C1 3
@@ -16,6 +16,7 @@ boolean c0_new;
 
 void setup()
 {
+  Serial.begin(9600);
   pinMode(PIN_C0, INPUT);
   pinMode(PIN_C1, INPUT);
   pinMode(PIN_CUE_RIGHT, OUTPUT);
@@ -34,8 +35,8 @@ void loop()
 {
   delay(DELAY);
   
-  c1_new = analogRead(PIN_C1);
-  c0_new = analogRead(PIN_C0);
+  c1_new = digitalRead(PIN_C1);
+  c0_new = digitalRead(PIN_C0);
   if (c1_new != c1 || c0_new != c0)
   {
     writeLed(c1, c0, LOW);

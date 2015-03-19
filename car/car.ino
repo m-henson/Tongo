@@ -40,18 +40,6 @@ void setup()
 
 void loop()
 {
-  /*
-  delay(10000);
-  controlCar(0x1F);
-  delay(1000);
-  controlCar(0x3F);
-  delay(1000);
-  controlCar(0x0F);
-  delay(1000);
-  controlCar(0x2F);
-  delay(1000);
-  controlCar(0x40);
-  */
 }
 
 void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
@@ -64,6 +52,11 @@ void controlCar(int update)
 {
   update_speed = update % N_MAGS;
   update_direction = (update - update_speed) / N_MAGS;
+  Serial.print(update);
+  Serial.print(": ");
+  Serial.print(update_direction);
+  Serial.print(" -> ");
+  Serial.println(update_speed);
   
   if (update_speed == 0)
   {

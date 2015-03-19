@@ -1,15 +1,7 @@
-/*
-This sketch demonstrates how to send data from a Device
-to a Host in a Gazell network.
-
-When Button A on the Device is pressed and released,
-the green led on the host will toggle.
-*/
-
 #include <RFduinoGZLL.h>
 
 #define ROLE DEVICE0
-#define DELAY 100
+#define DELAY 50
 
 #define PIN_RIGHT 2
 #define PIN_FORWARD 3
@@ -21,9 +13,9 @@ the green led on the host will toggle.
 #define BACKWARD 3
 #define BRAKE 4
 
-#define V_MAX 77
-#define V_MIN 2
-#define V_DIV 5.0
+#define V_MAX 251
+#define V_MIN 11
+#define V_DIV 16.0
 
 #define N_MAGS 16
 
@@ -77,7 +69,7 @@ void loop()
   
   if (mag_new <= 0)
   {
-    heading = 4;
+    heading = BRAKE;
   }
   
   state_new = String(heading*N_MAGS + mag_new);
@@ -87,25 +79,18 @@ void loop()
     Serial.print(": ");
     Serial.print(heading);
     Serial.print(" -> ");
-    Serial.println(mag_new);
+    Serial.print(mag_new);
+    Serial.print("        ");
+    Serial.print(reading_left);
+    Serial.print("        ");
+    Serial.print(reading_forward);
+    Serial.print("        ");
+    Serial.println(reading_right);
     RFduinoGZLL.sendToHost(state_new);
     state_current = state_new;
     mag_current = mag_new;
   }
-  /*
-  delay(10000);
-  RFduinoGZLL.sendToHost(0x1F);
-  delay(1000);
-  RFduinoGZLL.sendToHost(0x3F);
-  delay(1000);
-  RFduinoGZLL.sendToHost(0x0F);
-  delay(1000);
-  RFduinoGZLL.sendToHost(0x2F);
-  delay(1000);
-  RFduinoGZLL.sendToHost(0x40);
-  */
 }
-
 
 int getMag(int voltage)
 {
