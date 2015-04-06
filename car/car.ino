@@ -7,9 +7,9 @@
 #define PIN_EA 2
 #define PIN_EB 1
 
-#define RIGHT 0
-#define FORWARD 1
-#define LEFT 2
+#define RIGHT 2
+#define FORWARD 0
+#define LEFT 1
 #define BACKWARD 3
 #define BRAKE 4
 
@@ -51,6 +51,10 @@ void RFduinoGZLL_onReceive(device_t device, int rssi, char *data, int len)
 void controlCar(int update)
 {
   update_speed = update % N_MAGS;
+  /*if (update_speed <= 4)
+  {
+    update_speed = 0;
+  }*/
   update_direction = (update - update_speed) / N_MAGS;
   Serial.print(update);
   Serial.print(": ");
